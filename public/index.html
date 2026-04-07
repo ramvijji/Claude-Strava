@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Connect with Strava</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, sans-serif;
+      background: #f5f5f5;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #333;
+    }
+    .container {
+      background: white;
+      border-radius: 16px;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.1);
+      padding: 48px 40px;
+      max-width: 480px;
+      width: 90%;
+      text-align: center;
+    }
+    .logo-area { margin-bottom: 32px; }
+    .strava-logo {
+      width: 64px; height: 64px;
+      background: #FC4C02;
+      border-radius: 12px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 16px;
+    }
+    .strava-logo svg { width: 40px; height: 40px; fill: white; }
+    h1 { font-size: 28px; font-weight: 700; color: #1a1a1a; margin-bottom: 8px; }
+    .subtitle { font-size: 15px; color: #666; line-height: 1.5; }
+    .connect-section { margin-top: 40px; }
+    .btn-strava {
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      background: #FC4C02;
+      color: white;
+      text-decoration: none;
+      padding: 14px 28px;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: 600;
+      transition: background 0.2s, transform 0.1s;
+    }
+    .btn-strava:hover { background: #e04302; transform: translateY(-1px); }
+    .btn-strava svg { width: 22px; height: 22px; fill: white; }
+    .privacy-note { margin-top: 20px; font-size: 13px; color: #999; }
+    .athlete-card {
+      background: #f9f9f9;
+      border-radius: 12px;
+      padding: 28px 24px;
+      margin-bottom: 24px;
+    }
+    .athlete-avatar {
+      width: 80px; height: 80px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 3px solid #FC4C02;
+      margin-bottom: 16px;
+    }
+    .athlete-avatar-placeholder {
+      width: 80px; height: 80px;
+      border-radius: 50%;
+      background: #FC4C02;
+      color: white;
+      font-size: 28px;
+      font-weight: 700;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 16px;
+    }
+    .athlete-name { font-size: 22px; font-weight: 700; color: #1a1a1a; margin-bottom: 4px; }
+    .athlete-location { font-size: 14px; color: #888; margin-bottom: 16px; }
+    .connected-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: #e8f5e9;
+      color: #2e7d32;
+      font-size: 13px;
+      font-weight: 600;
+      padding: 4px 12px;
+      border-radius: 20px;
+    }
+    .connected-badge::before {
+      content: '';
+      width: 8px; height: 8px;
+      background: #4caf50;
+      border-radius: 50%;
+      display: inline-block;
+    }
+    .athlete-stats {
+      display: flex;
+      margin-top: 20px;
+      border-top: 1px solid #e8e8e8;
+      padding-top: 20px;
+    }
+    .stat-item {
+      flex: 1;
+      text-align: center;
+      padding: 0 12px;
+      border-right: 1px solid #e8e8e8;
+    }
+    .stat-item:last-child { border-right: none; }
+    .stat-value { font-size: 20px; font-weight: 700; color: #FC4C02; }
+    .stat-label { font-size: 11px; color: #999; text-transform: uppercase; letter-spacing: 0.5px; margin-top: 2px; }
+    .btn-logout {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: transparent;
+      color: #666;
+      border: 1.5px solid #ddd;
+      padding: 10px 24px;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      text-decoration: none;
+      transition: border-color 0.2s, color 0.2s;
+    }
+    .btn-logout:hover { border-color: #FC4C02; color: #FC4C02; }
+    .loading-section { padding: 20px 0; }
+    .spinner {
+      width: 36px; height: 36px;
+      border: 3px solid #f0f0f0;
+      border-top-color: #FC4C02;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin: 0 auto 16px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .loading-text { color: #999; font-size: 14px; }
+    .error-banner {
+      display: none;
+      background: #fff3f2;
+      border: 1px solid #ffcccc;
+      border-radius: 8px;
+      padding: 12px 16px;
+      margin-bottom: 20px;
+      font-size: 14px;
+      color: #cc3300;
+      text-align: left;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="logo-area">
+      <div class="strava-logo">
+        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <path d="M15.387 17.944l-2.089-4.116h-3.065L15.387 24l5.15-10.172h-3.066m-7.008-5.599l2.836 5.598h4.172L10.463 0 0 19.828h4.17"/>
+        </svg>
+      </div>
+      <h1>Strava Connect</h1>
+      <p class="subtitle">Link your Strava account to view your activities and athlete profile.</p>
+    </div>
+
+    <div id="errorBanner" class="error-banner"></div>
+
+    <div id="loadingSection" class="loading-section">
+      <div class="spinner"></div>
+      <p class="loading-text">Checking connection...</p>
+    </div>
+
+    <div id="connectSection" class="connect-section" style="display:none;">
+      <a href="/auth/strava" class="btn-strava">
+        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <path d="M15.387 17.944l-2.089-4.116h-3.065L15.387 24l5.15-10.172h-3.066m-7.008-5.599l2.836 5.598h4.172L10.463 0 0 19.828h4.17"/>
+        </svg>
+        Connect with Strava
+      </a>
+      <p class="privacy-note">You'll be redirected to Strava to authorize access.</p>
+    </div>
+
+    <div id="profileSection" style="display:none;">
+      <div class="athlete-card">
+        <div id="athleteAvatar"></div>
+        <div id="athleteName" class="athlete-name"></div>
+        <div id="athleteLocation" class="athlete-location"></div>
+        <span class="connected-badge">Connected</span>
+        <div class="athlete-stats">
+          <div class="stat-item">
+            <div id="statFollowers" class="stat-value">-</div>
+            <div class="stat-label">Followers</div>
+          </div>
+          <div class="stat-item">
+            <div id="statFollowing" class="stat-value">-</div>
+            <div class="stat-label">Following</div>
+          </div>
+          <div class="stat-item">
+            <div id="statType" class="stat-value">-</div>
+            <div class="stat-label">Account</div>
+          </div>
+        </div>
+      </div>
+      <a href="/auth/logout" class="btn-logout">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+          <polyline points="16 17 21 12 16 7"/>
+          <line x1="21" y1="12" x2="9" y2="12"/>
+        </svg>
+        Disconnect Account
+      </a>
+    </div>
+  </div>
+
+  <script>
+    const loadingSection = document.getElementById('loadingSection');
+    const connectSection = document.getElementById('connectSection');
+    const profileSection = document.getElementById('profileSection');
+    const errorBanner = document.getElementById('errorBanner');
+
+    function showError(message) {
+      errorBanner.textContent = message;
+      errorBanner.style.display = 'block';
+    }
+
+    function showConnect() {
+      loadingSection.style.display = 'none';
+      connectSection.style.display = 'block';
+      profileSection.style.display = 'none';
+    }
+
+    function showProfile(athlete) {
+      loadingSection.style.display = 'none';
+      connectSection.style.display = 'none';
+      profileSection.style.display = 'block';
+
+      const avatarContainer = document.getElementById('athleteAvatar');
+      if (athlete.profile && athlete.profile !== 'avatar/athlete/large.png') {
+        const img = document.createElement('img');
+        img.src = athlete.profile;
+        img.alt = athlete.firstname + ' ' + athlete.lastname;
+        img.className = 'athlete-avatar';
+        img.onerror = () => {
+          avatarContainer.innerHTML = `<div class="athlete-avatar-placeholder">${(athlete.firstname || '?')[0].toUpperCase()}</div>`;
+        };
+        avatarContainer.appendChild(img);
+      } else {
+        const initial = (athlete.firstname || '?')[0].toUpperCase();
+        avatarContainer.innerHTML = `<div class="athlete-avatar-placeholder">${initial}</div>`;
+      }
+
+      const fullName = [athlete.firstname, athlete.lastname].filter(Boolean).join(' ') || 'Strava Athlete';
+      document.getElementById('athleteName').textContent = fullName;
+
+      const locationParts = [athlete.city, athlete.state, athlete.country].filter(Boolean);
+      const locationEl = document.getElementById('athleteLocation');
+      if (locationParts.length > 0) {
+        locationEl.textContent = locationParts.join(', ');
+        locationEl.style.display = 'block';
+      } else {
+        locationEl.style.display = 'none';
+      }
+
+      document.getElementById('statFollowers').textContent = (athlete.follower_count ?? '-').toLocaleString();
+      document.getElementById('statFollowing').textContent = (athlete.friend_count ?? '-').toLocaleString();
+      document.getElementById('statType').textContent = athlete.premium ? 'Summit' : 'Free';
+    }
+
+    async function checkAuth() {
+      const params = new URLSearchParams(window.location.search);
+      const urlError = params.get('error');
+      if (urlError) {
+        showError('Authorization failed: ' + decodeURIComponent(urlError));
+        window.history.replaceState({}, '', '/');
+      }
+
+      try {
+        const response = await fetch('/api/athlete');
+        if (response.ok) {
+          const data = await response.json();
+          showProfile(data.athlete);
+        } else {
+          showConnect();
+        }
+      } catch (err) {
+        showConnect();
+      }
+    }
+
+    checkAuth();
+  </script>
+</body>
+</html>
