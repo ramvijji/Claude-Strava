@@ -1,0 +1,19 @@
+{
+  "name": "claude-strava",
+  "version": "1.0.0",
+  "description": "Connect your Strava account via OAuth",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "nodemon server.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "dotenv": "^16.3.1",
+    "axios": "^1.6.0",
+    "express-session": "^1.17.3"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.2"
+  }
+}
